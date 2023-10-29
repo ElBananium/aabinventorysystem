@@ -1,0 +1,95 @@
+﻿@using Sandbox.InventoryUI.BaseInventoryUI;
+@using Sandbox.InventoryUI;
+@using Sandbox.UI;
+@using Sandbox;
+@using System;
+@using System.Collections.Generic;
+@using System.Linq;
+@using System.Text.Json;
+
+
+<root class="baseInventory">
+    <div class="head">@HeadTitle</div>
+    <div class="body">
+        <div class="content">
+            @if(Slots.Count() == 0)
+            {
+                <label class="empty-label">Empty</label>
+            }
+            @foreach (var slot in Slots)
+            {
+                <ItemSlot 
+                    onclick=@(() => OnItemSlotClicked(slot.SlotId, MouseButtons.Left)) 
+                    onmiddleclick =@(() => OnItemSlotClicked(slot.SlotId, MouseButtons.Middle))
+                    onrightclick =@(() => OnItemSlotClicked(slot.SlotId, MouseButtons.Right))
+                    Slot=@slot ></ItemSlot>
+            }
+        </div>
+        <div class="bottom">
+            <div class="weight">WEIGHT @TotalWeight/@MaxWeight</div>
+            <div class="size">SIZE @TotalSize/@MaxSize</div>
+        </div>
+    </div>
+
+</root>
+
+@code
+{
+
+    protected virtual void OnItemSlotClicked(int slotId, MouseButtons mouseButton)
+    {
+
+    }
+
+
+    public virtual void MoveBetweenInventories(int slotId, MouseButtons mouseButton, string command)
+    {
+
+        if (!InventoryUI.InventoryUi.BoxInventory.IsBoxOpened) return;
+
+        var itemIds = Slots.First(x => x.SlotId == slotId).ItemIds;
+        switch (mouseButton)
+        {
+            case MouseButtons.Left:
+                itemIds = itemIds.Take(1);
+                break;
+            case MouseButtons.Right:
+                InventoryUI.InventoryUi.CountSlider.SetCountSliderInfo(itemIds,command);
+                InventoryUI.InventoryUi.CountSlider.Open();
+                return;
+            case MouseButtons.Middle:
+                //take all, its takes all always
+                break;
+
+        }
+
+        MoveBetweenInventories(itemIds,command);
+    }
+
+
+    public virtual void MoveBetweenInventories(IEnumerable<int> itemIds, string command)
+    {
+        var sendItemIdsJson = JsonSerializer.Serialize<IEnumerable<int>>(itemIds);
+
+        ConsoleSystem.Run(command, InventoryUI.InventoryUi.BoxInventory.BoxNetworkIdent, sendItemIdsJson);
+
+        InventoryUI.InventoryUi.StateHasChanged();
+        InventoryUI.InventoryUi.CountSlider.Close();
+
+    }
+
+    public IEnumerable<InventorySlot> Slots { get; set; }
+
+
+    public int TotalWeight { get; set; }
+
+    public int TotalSize { get; set; }
+
+    public int MaxWeight { get; set; }
+
+    public int MaxSize { get; set; }
+
+    public string HeadTitle { get; set; }
+
+
+}

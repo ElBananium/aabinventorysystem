@@ -1,0 +1,106 @@
+﻿@using Sandbox.InventoryUI.BaseInventoryUI;
+@using Sandbox.InventoryUI;
+@using Sandbox.UI;
+@using Sandbox;
+@using System;
+@using System.Collections.Generic;
+@using System.Linq;
+
+<root class="invui_hidden">
+    <div class="slider-content">
+        <div class="count-label">@SelectedCount</div>
+        <div class="slider-box">
+            <div @ref=Slider class="slider">
+                <div @ref=SliderChange onmouseup="@OnSliderChangeMouseUp" onmousedown="@OnSliderChangeMouseDown" style="left:@(SelectedCount*100/MaxCount)%" class="slider-change"></div>
+            </div>
+        </div>
+
+    </div>
+    <div class="buttons">
+        <div class="button confirm" onclick=@OnConfirmClicked>CONFIRM</div>
+        <div class="button cancel" onclick=@OnCancelClicked>CANCEL</div>
+    </div>
+
+    
+</root>
+
+@code
+{
+
+    public int MaxCount = 100;
+
+    public int SelectedCount = 0;
+
+    public Panel SliderChange;
+
+    public Panel Slider;
+
+    protected bool IsMouseUp = true;
+
+    public void OnSliderChangeMouseUp()
+    {
+        IsMouseUp = true;
+    }
+
+    public void OnSliderChangeMouseDown()
+    {
+        IsMouseUp = false;
+    }
+
+    protected void OnCancelClicked()
+    {
+        Close();
+
+    }
+
+    public IEnumerable<int> ItemIds{ get; set; }
+
+    public string Command { get; set; }
+
+    public void SetCountSliderInfo(IEnumerable<int> itemIds, string command)
+    {
+        ItemIds = itemIds;
+        MaxCount = itemIds.Count();
+        SelectedCount = (int)(MaxCount/2) + 1;
+        Command = command;
+        StateHasChanged();
+    }
+
+    public void OnConfirmClicked()
+    {
+        InventoryUI.InventoryUi.PlayerInventory.MoveBetweenInventories(ItemIds.Take(SelectedCount), Command);
+        
+        Close();
+    }
+
+    public void Close()
+    {
+        AddClass("invui_hidden");
+    }
+
+    public void Open()
+    {
+        RemoveClass("invui_hidden");
+    }
+
+
+    public override void Tick()
+    {
+        if (IsMouseUp) return;
+        if (SliderChange.MousePosition.x > -10 && SliderChange.MousePosition.x < 10) return;
+
+        int mouseCursorRighterThan = 0; 
+        for (int i = 0; i < (MaxCount+1); i++)
+        {
+            float sliderPos = (Slider.Box.Rect.Width * i) / MaxCount;
+            if (Slider.MousePosition.x > sliderPos)
+            {
+                mouseCursorRighterThan = i;
+            }
+        }
+
+        SelectedCount = mouseCursorRighterThan;
+        StateHasChanged();
+    }
+
+}

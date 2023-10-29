@@ -1,0 +1,49 @@
+﻿@using Sandbox.InventoryUI.BaseInventoryUI;
+@using Sandbox.InventoryUI;
+@using Sandbox.UI;
+@using Sandbox;
+@using System;
+@using System.Collections.Generic;
+@using System.Linq;
+
+<root>
+
+    <div class="img-block">
+        <img src="@Slot.ImgSrc" />
+        <div class="count">@("x"+Slot.Count)</div>
+    </div>
+    <div class="info-block">
+        <div class="name">@Slot.Name</div>
+        <div class="description">@Slot.Description</div>
+        <div class="total-block">
+            <div class="total-size">TOTAL SIZE @Slot.TotalSize</div>
+            <div class="total-weight">TOTAL WEIGHT @Slot.TotalWeight</div>
+        </div>
+    </div>
+    @if (InventoryUI.ShowDebug)
+    {
+        <div class="debug">
+            <div>SlotId - @Slot.SlotId</div>
+            <div>ItemId - @Slot.ItemIds.First()</div>
+            <div>ItemInfoId - @Slot.ItemInfoId</div>
+        </div>
+    }
+</root>
+
+@code
+{
+    public InventorySlot Slot { get; set; }
+
+
+    protected bool AnimateDrag { get; set; }
+
+
+    protected override int BuildHash()
+    {
+        return HashCode.Combine(Slot.GetHashCode(), InventoryUI.ShowDebug) ;
+    }
+
+
+
+
+}
