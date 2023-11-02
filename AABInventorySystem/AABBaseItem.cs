@@ -15,7 +15,8 @@ namespace Sandbox.AABInventorySystem
 
 
 		public AABBaseItem(AABBaseItemInfo info)
-		{
+		{	
+			Game.AssertServer();
 			Id = AllocateNextAABBaseItem();
 			Info = info;
 		}

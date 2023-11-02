@@ -22,6 +22,7 @@ namespace Sandbox.AABInventorySystem
 
 		public AABBaseItemInfo(string description, string imgSrc, string name, int weight, int size)
 		{
+			Game.AssertServer();
 			Id = AABBaseItemInfo.AllocateAABBaseItemInfoId();
 			Description = description;
 			ImgSrc = imgSrc;
